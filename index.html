@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SHEride interactive web app prototype for riders and drivers.">
+  <title>SHEride | Women-First Ride Share</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-primary: #1DB954;
+      --green-deep: #145A32;
+      --green-soft: #DFF7EA;
+      --red-primary: #E74C3C;
+      --red-deep: #C0392B;
+      --red-soft: #F1948A;
+      --bg-ivory: #FDFDF5;
+      --bg-sage: #F0FAF4;
+      --text-dark: #1A1A1A;
+      --text-muted: #6B7280;
+      --line: #D9E6DE;
+      --white: #FFFFFF;
+      --radius-card: 16px;
+      --radius-pill: 50px;
+      --shadow-card: 0 4px 24px rgba(26, 26, 26, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg-ivory);
+      color: var(--text-dark);
+      font-family: "Poppins", sans-serif;
+      line-height: 1.6;
+    }
+    body.nav-open { overflow: hidden; }
+    a { color: inherit; }
+    button, input, select { font: inherit; }
+    h1, h2, h3, h4, p { margin: 0; }
+    h1, h2, h3, h4 { font-family: "Poppins", sans-serif; line-height: 1.08; letter-spacing: 0; }
+    h1 { font-size: clamp(3rem, 8vw, 5.7rem); font-weight: 900; }
+    h2 { font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 900; color: var(--green-deep); }
+    h3 { font-size: 1.25rem; font-weight: 800; }
+
+    .navbar {
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: var(--green-deep);
+      color: var(--white);
+      transition: var(--transition);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      width: min(1180px, calc(100% - 32px));
+      min-height: 72px;
+      margin: 0 auto;
+    }
+    .logo {
+      font-family: "Montserrat", sans-serif;
+      font-size: 1.55rem;
+      font-weight: 900;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .logo span { color: var(--red-soft); }
+    .nav-menu {
+      position: fixed;
+      inset: 72px 0 0;
+      display: grid;
+      align-content: start;
+      gap: 1.2rem;
+      padding: 2rem;
+      background: var(--green-deep);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    .nav-menu.active { transform: translateX(0); }
+    .nav-links, .nav-actions {
+      display: grid;
+      gap: 1rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .nav-links a {
+      position: relative;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .nav-links a.active::after {
+      position: absolute;
+      right: 0;
+      bottom: -8px;
+      left: 0;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--red-primary);
+      content: "";
+    }
+    .hamburger {
+      display: inline-grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--white);
+      cursor: pointer;
+    }
+    .hamburger-lines, .hamburger-lines::before, .hamburger-lines::after {
+      display: block;
+      width: 20px;
+      height: 2px;
+      border-radius: 99px;
+      background: currentColor;
+      transition: var(--transition);
+      content: "";
+    }
+    .hamburger-lines { position: relative; }
+    .hamburger-lines::before, .hamburger-lines::after { position: absolute; left: 0; }
+    .hamburger-lines::before { top: -7px; }
+    .hamburger-lines::after { top: 7px; }
+    .hamburger.open .hamburger-lines { background: transparent; }
+    .hamburger.open .hamburger-lines::before { top: 0; transform: rotate(45deg); }
+    .hamburger.open .hamburger-lines::after { top: 0; transform: rotate(-45deg); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 48px;
+      padding: 13px 24px;
+      border: 2px solid transparent;
+      border-radius: var(--radius-pill);
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-primary { background: var(--red-primary); color: var(--white); border-color: var(--red-primary); }
+    .btn-primary:hover, .btn-primary:focus-visible { background: var(--red-deep); border-color: var(--red-deep); box-shadow: 0 8px 20px rgba(231,76,60,0.35); transform: translateY(-2px); }
+    .btn-secondary { background: var(--white); color: var(--green-deep); border-color: var(--white); }
+    .btn-secondary:hover, .btn-secondary:focus-visible { background: transparent; color: var(--white); transform: translateY(-2px); }
+    .btn-outline-white { background: transparent; color: var(--white); border-color: var(--white); }
+    .btn-outline-white:hover, .btn-outline-white:focus-visible { background: var(--white); color: var(--green-deep); }
+    .btn-ghost { background: var(--bg-sage); color: var(--green-deep); border-color: var(--line); }
+    .btn-small { min-height: 38px; padding: 9px 14px; font-size: 0.74rem; }
+    .btn:disabled { cursor: not-allowed; opacity: 0.55; transform: none; box-shadow: none; }
+
+    .app { min-height: 100vh; padding-top: 72px; }
+    .container { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    .section { padding: 76px 0; }
+    .section-heading { max-width: 760px; margin: 0 auto 2.4rem; text-align: center; }
+    .section-heading p { margin-top: 0.75rem; color: var(--text-muted); }
+    .grid-2, .grid-3, .grid-4 { display: grid; gap: 1rem; }
+    .panel, .card {
+      border: 1px solid rgba(20,90,50,0.08);
+      border-radius: var(--radius-card);
+      background: var(--white);
+      box-shadow: var(--shadow-card);
+    }
+    .panel { padding: 1.25rem; }
+    .card { padding: 1.5rem; transition: var(--transition); }
+    .card:hover { box-shadow: 0 12px 32px rgba(26,26,26,0.12); transform: translateY(-3px); }
+    .sage { background: var(--bg-sage); }
+    .muted { color: var(--text-muted); }
+    .green { color: var(--green-deep); }
+    .red { color: var(--red-primary); }
+
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 72px);
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(29,185,84,0.92), rgba(20,90,50,0.94)),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.22), transparent 28%);
+      color: var(--white);
+    }
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 2rem;
+      align-items: center;
+      min-height: calc(100vh - 72px);
+      padding: 48px 0;
+    }
+    .hero p { color: rgba(255,255,255,0.9); }
+    .hero-subhead { max-width: 760px; margin-top: 1.25rem; font-size: clamp(1.08rem, 2.5vw, 1.42rem); font-weight: 300; }
+    .hero-kicker {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 1rem;
+      padding: 0.45rem 0.85rem;
+      border: 1px solid rgba(255,255,255,0.48);
+      border-radius: var(--radius-pill);
+      background: rgba(255,255,255,0.13);
+      font-family: "Montserrat", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .hero-actions, .trust-row { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 1.6rem; }
+    .trust-badge {
+      padding: 0.6rem 0.9rem;
+      border: 1px solid rgba(255,255,255,0.38);
+      border-radius: var(--radius-pill);
+      background: rgba(255,255,255,0.14);
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+    }
+    .blob {
+      position: absolute;
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      opacity: 0.12;
+      animation: morph 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .blob-one { top: 11%; right: 10%; width: 290px; height: 290px; background: var(--white); }
+    .blob-two { bottom: 7%; left: 8%; width: 210px; height: 210px; background: var(--red-soft); animation-delay: -3s; }
+    @keyframes morph {
+      0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+      50% { border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%; }
+    }
+    .phone-mockup {
+      width: min(330px, 85vw);
+      margin: 0 auto;
+      padding: 14px;
+      border: 10px solid rgba(255,255,255,0.78);
+      border-radius: 34px;
+      background: #102b1d;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.28);
+      transform: rotate(2deg);
+    }
+    .phone-screen {
+      min-height: 520px;
+      padding: 1rem;
+      border-radius: 22px;
+      background: var(--bg-ivory);
+      color: var(--text-dark);
+    }
+    .phone-route { display: grid; gap: 0.7rem; margin: 1rem 0; }
+    .phone-row { padding: 0.8rem; border-radius: 12px; background: var(--white); box-shadow: var(--shadow-card); }
+    .mini-map {
+      position: relative;
+      height: 170px;
+      overflow: hidden;
+      border-radius: 16px;
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(20,90,50,0.16) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(20,90,50,0.14) 50%, transparent 51%),
+        linear-gradient(135deg, #d4edda, #a8d5b5);
+      background-size: 80px 80px, 80px 80px, auto;
+    }
+    .map-dot { position: absolute; width: 18px; height: 18px; border: 4px solid var(--white); border-radius: 50%; background: var(--red-primary); box-shadow: 0 0 0 8px rgba(231,76,60,0.15); }
+    .map-dot.start { top: 28%; left: 23%; }
+    .map-dot.end { right: 26%; bottom: 24%; background: var(--green-primary); }
+    .stats-bar { background: var(--text-dark); color: var(--white); }
+    .stats-grid { display: grid; gap: 1px; background: rgba(255,255,255,0.12); }
+    .stat-cell { padding: 1.4rem; background: var(--text-dark); text-align: center; }
+    .stat-number { display: block; color: var(--green-primary); font-family: "Montserrat", sans-serif; font-size: 1.75rem; font-weight: 900; }
+
+    .step-card { cursor: pointer; }
+    .step-number {
+      display: inline-grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      background: var(--green-primary);
+      color: var(--white);
+      font-family: "Montserrat", sans-serif;
+      font-weight: 900;
+    }
+    .step-detail { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--green-deep); font-weight: 700; }
+    .step-card.open .step-detail { display: block; }
+    .testimonial-shell { overflow: hidden; }
+    .testimonial-track { display: flex; transition: transform 0.45s ease; }
+    .testimonial-card { min-width: 100%; padding: 1.5rem; background: var(--white); }
+    .rating { color: var(--red-primary); font-weight: 900; letter-spacing: 0.08em; }
+    .dots { display: flex; justify-content: center; gap: 0.45rem; margin-top: 1rem; }
+    .dot { width: 10px; height: 10px; border: 0; border-radius: 50%; background: #BFD7C8; cursor: pointer; }
+    .dot.active { background: var(--red-primary); }
+    .distribution { margin-top: 1.25rem; }
+    .bar { overflow: hidden; height: 12px; border-radius: 999px; background: #E2E8E4; }
+    .bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green-primary), var(--green-deep)); }
+    .city-search { display: grid; gap: 1rem; max-width: 780px; margin: 0 auto; }
+    .city-badges { display: flex; flex-wrap: wrap; gap: 0.65rem; justify-content: center; }
+    .city-badge { border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--white); color: var(--green-deep); padding: 0.65rem 1rem; cursor: pointer; font-weight: 700; }
+
+    .auth-page {
+      min-height: calc(100vh - 72px);
+      display: grid;
+      place-items: center;
+      padding: 48px 16px;
+      background: linear-gradient(135deg, var(--green-primary), var(--green-deep));
+    }
+    .auth-card { width: min(100%, 460px); padding: 2rem; border-radius: 20px; background: var(--white); box-shadow: 0 24px 70px rgba(26,26,26,0.28); }
+    .form-grid { display: grid; gap: 1rem; }
+    .form-row { display: grid; gap: 0.45rem; }
+    label { color: var(--text-dark); font-weight: 700; }
+    input, select {
+      width: 100%;
+      min-height: 50px;
+      padding: 0.85rem 1rem;
+      border: 1px solid #D7DED9;
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--text-dark);
+      outline: none;
+      transition: var(--transition);
+    }
+    input:focus, select:focus { border-color: var(--green-primary); box-shadow: 0 0 0 4px rgba(29,185,84,0.16); }
+    .inline-error { min-height: 1.1rem; color: var(--red-deep); font-size: 0.84rem; font-weight: 700; }
+    .password-wrap { position: relative; }
+    .show-pass { position: absolute; top: 8px; right: 8px; min-height: 34px; border: 0; border-radius: 999px; background: var(--bg-sage); color: var(--green-deep); cursor: pointer; }
+    .checkbox-row { display: flex; align-items: center; gap: 0.6rem; }
+    .checkbox-row input { width: 18px; min-height: 18px; }
+    .divider { display: flex; align-items: center; gap: 0.8rem; color: var(--text-muted); font-size: 0.9rem; }
+    .divider::before, .divider::after { flex: 1; height: 1px; background: var(--line); content: ""; }
+    .oauth { width: 100%; background: var(--white); color: var(--text-dark); border-color: var(--line); }
+    .progress { height: 10px; overflow: hidden; border-radius: 999px; background: #E2E8E4; }
+    .progress span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--green-primary), var(--green-deep)); transition: width 0.3s ease; }
+    .choice-grid { display: grid; gap: 1rem; }
+    .choice-card { position: relative; padding: 1.25rem; border: 2px solid var(--line); border-radius: 16px; background: var(--white); cursor: pointer; }
+    .choice-card.selected { border-color: var(--green-primary); box-shadow: 0 0 0 4px rgba(29,185,84,0.12); }
+    .check-badge { display: none; position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--green-primary); color: var(--white); text-align: center; font-weight: 900; }
+    .choice-card.selected .check-badge { display: block; }
+    .strength-bar { display: flex; gap: 4px; }
+    .strength-bar span { flex: 1; height: 5px; border-radius: 5px; background: #DDD; }
+    .strength-bar.weak span:nth-child(-n+1) { background: var(--red-primary); }
+    .strength-bar.fair span:nth-child(-n+2) { background: #F39C12; }
+    .strength-bar.good span:nth-child(-n+3) { background: #C9B51E; }
+    .strength-bar.strong span { background: var(--green-primary); }
+
+    .dash-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .avatar-circle {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--red-primary);
+      color: var(--white);
+      font-weight: 900;
+    }
+    .nav-user-menu { position: relative; display: flex; align-items: center; gap: 0.55rem; padding: 0.25rem; border-radius: 999px; cursor: pointer; }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      display: none;
+      min-width: 180px;
+      padding: 0.5rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--text-dark);
+      box-shadow: var(--shadow-card);
+    }
+    .nav-user-menu:hover .dropdown-menu { display: block; }
+    .dropdown-menu a, .dropdown-menu button { display: block; width: 100%; padding: 0.7rem; border: 0; border-radius: 8px; background: transparent; color: var(--text-dark); text-align: left; text-decoration: none; cursor: pointer; }
+    .dropdown-menu a:hover, .dropdown-menu button:hover { background: var(--bg-sage); }
+    .segmented { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .segment { border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--white); color: var(--green-deep); padding: 0.65rem 1rem; cursor: pointer; font-weight: 800; }
+    .segment.active { background: var(--green-primary); color: var(--white); border-color: var(--green-primary); }
+    .map-placeholder {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 280px;
+      overflow: hidden;
+      border-radius: 16px;
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(20,90,50,0.15) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(20,90,50,0.12) 50%, transparent 51%),
+        linear-gradient(135deg, #d4edda, #a8d5b5);
+      background-size: 72px 72px, 72px 72px, auto;
+      color: var(--green-deep);
+      text-align: center;
+      font-weight: 800;
+    }
+    .pulse-pin { width: 30px; height: 30px; margin: 0 auto 0.75rem; border: 8px solid var(--white); border-radius: 50%; background: var(--red-primary); animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+    .ride-row { display: grid; gap: 0.35rem; padding: 1rem 0; border-bottom: 1px solid var(--line); }
+    .ride-row:last-child { border-bottom: 0; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .switch { position: relative; width: 54px; height: 30px; border: 0; border-radius: 999px; background: #CAD5CE; cursor: pointer; }
+    .switch::after { position: absolute; top: 4px; left: 4px; width: 22px; height: 22px; border-radius: 50%; background: var(--white); transition: var(--transition); content: ""; }
+    .switch.on { background: var(--green-primary); }
+    .switch.on::after { transform: translateX(24px); }
+    .promo { border: 1px dashed var(--red-primary); background: #FFF2F0; }
+    .online-hero { text-align: center; background: linear-gradient(135deg, #FCEBE8, var(--white)); transition: var(--transition); }
+    .online-hero.online { background: linear-gradient(135deg, var(--green-primary), var(--green-deep)); color: var(--white); animation: onlinePulse 2s ease-in-out infinite; }
+    @keyframes onlinePulse { 0%,100% { box-shadow: var(--shadow-card); } 50% { box-shadow: 0 0 0 10px rgba(29,185,84,0.14); } }
+    .metric-card.primary { background: var(--green-deep); color: var(--white); }
+    .chart-wrap { overflow-x: auto; }
+    canvas { max-width: 100%; }
+
+    .booking-shell { max-width: 980px; margin: 0 auto; }
+    .suggestions { display: grid; gap: 0.4rem; margin-top: 0.35rem; }
+    .suggestion { padding: 0.65rem 0.8rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-sage); cursor: pointer; }
+    .ride-type-card { border: 2px solid var(--line); cursor: pointer; }
+    .ride-type-card.selected { border-color: var(--green-primary); box-shadow: 0 0 0 4px rgba(29,185,84,0.12); }
+    .summary-list { display: grid; gap: 0.8rem; }
+    .summary-list div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--line); padding-bottom: 0.8rem; }
+    .countdown { color: var(--green-deep); font-family: "Montserrat", sans-serif; font-size: 2.4rem; font-weight: 900; }
+
+    .sub-hero { min-height: 46vh; display: grid; place-items: center; background: linear-gradient(135deg, var(--green-primary), var(--green-deep)); color: var(--white); text-align: center; }
+    .sub-hero h1, .sub-hero h2 { color: var(--white); }
+    .faq-item { border-bottom: 1px solid var(--line); }
+    .faq-question { display: flex; justify-content: space-between; width: 100%; padding: 1rem 0; border: 0; background: transparent; color: var(--text-dark); font-weight: 800; text-align: left; cursor: pointer; }
+    .faq-answer { display: none; padding-bottom: 1rem; color: var(--text-muted); }
+    .faq-item.open .faq-answer { display: block; }
+    .timeline { position: relative; display: grid; gap: 1rem; margin-top: 1rem; }
+    .timeline::before { position: absolute; top: 10px; bottom: 10px; left: 13px; width: 3px; background: var(--green-primary); content: ""; }
+    .timeline-step { position: relative; padding-left: 44px; }
+    .timeline-step::before { position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; border: 4px solid var(--white); border-radius: 50%; background: var(--green-primary); box-shadow: 0 0 0 1px var(--green-primary); content: ""; }
+    .contact-row { display: grid; gap: 0.5rem; padding: 0.85rem 0; border-bottom: 1px solid var(--line); }
+    .press-row { display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; }
+    .press-pill { padding: 0.65rem 1rem; border-radius: 999px; background: #E9EEEb; color: #65716B; font-family: "Montserrat", sans-serif; font-weight: 900; filter: grayscale(1); }
+    .team-avatar { display: grid; place-items: center; width: 62px; height: 62px; margin-bottom: 1rem; border-radius: 50%; background: linear-gradient(135deg, var(--green-primary), var(--red-soft)); color: var(--white); font-weight: 900; }
+    .file-input { padding: 0.8rem; min-height: auto; }
+
+    #toast-container {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 2000;
+      display: grid;
+      gap: 0.7rem;
+      width: min(360px, calc(100% - 36px));
+    }
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.8rem;
+      padding: 0.95rem 1rem;
+      border-left: 4px solid var(--green-primary);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: 0 8px 30px rgba(26,26,26,0.15);
+      animation: slideUp 0.3s ease;
+    }
+    .toast-error { border-color: var(--red-primary); }
+    .toast-info { border-color: #3498DB; }
+    .toast button { border: 0; background: transparent; cursor: pointer; font-weight: 900; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(26,26,26,0.6);
+      backdrop-filter: blur(4px);
+    }
+    #modal-overlay.active { display: flex; }
+    .modal-card { position: relative; width: min(100%, 540px); max-height: min(82vh, 720px); overflow: auto; padding: 2rem; border-radius: 20px; background: var(--white); animation: popIn 0.25s ease; }
+    .modal-close { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--bg-sage); cursor: pointer; }
+    @keyframes popIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .footer { padding: 54px 0 28px; background: var(--text-dark); color: var(--white); }
+    .footer-grid { display: grid; gap: 2rem; }
+    .footer a { color: #B8C0BA; text-decoration: none; }
+    .footer h3 { color: var(--white); font-size: 1rem; }
+    .footer-links { display: grid; gap: 1.2rem; }
+    .footer-column { display: grid; gap: 0.45rem; align-content: start; }
+    .footer-bottom { margin-top: 2rem; padding-top: 1.4rem; border-top: 1px solid rgba(255,255,255,0.13); color: #A8B0AB; text-align: center; }
+
+    @media (min-width: 640px) {
+      .grid-2, .choice-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .grid-4, .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .contact-row { grid-template-columns: 1fr auto; align-items: center; }
+    }
+    @media (min-width: 1024px) {
+      .hamburger { display: none; }
+      .nav-menu { position: static; display: flex; align-items: center; justify-content: flex-end; gap: 1.2rem; padding: 0; background: transparent; transform: none; }
+      .nav-links, .nav-actions { display: flex; align-items: center; gap: 1rem; }
+      .nav-actions .btn { min-height: 42px; padding: 10px 16px; font-size: 0.76rem; }
+      .hero-grid { grid-template-columns: minmax(0, 1fr) 380px; }
+      .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .grid-4, .stats-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+      .dash-grid { grid-template-columns: minmax(0, 1.6fr) minmax(310px, 0.8fr); }
+      .footer-grid { grid-template-columns: 1fr 2fr; }
+      .footer-links { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" aria-label="Primary navigation">
+    <div class="nav-inner">
+      <a class="logo" href="#home" aria-label="SHEride home">SHE<span>ride</span></a>
+      <button class="hamburger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu">
+        <span class="hamburger-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-menu" id="nav-menu">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#home" data-route="home">Home</a></li>
+          <li><a href="#how-it-works" data-route="how-it-works">How It Works</a></li>
+          <li><a href="#safety" data-route="safety">Safety</a></li>
+          <li><a href="#book-ride" data-route="book-ride">Book</a></li>
+          <li><a href="#driver-apply" data-route="driver-apply">Drive</a></li>
+          <li><a href="#about" data-route="about">About</a></li>
+        </ul>
+        <div class="nav-actions" id="nav-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="app" id="app" tabindex="-1"></main>
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <button class="modal-close" type="button" onclick="closeModal()" aria-label="Close modal">x</button>
+      <h2 id="modal-title"></h2>
+      <div id="modal-body" style="margin-top:1rem"></div>
+    </div>
+  </div>
+
+  <script>
+    const MOCK_USERS = [
+      { email: "rider@sheride.com", password: "rider123", role: "rider", name: "Sarah" },
+      { email: "driver@sheride.com", password: "driver123", role: "driver", name: "Nadia" }
+    ];
+    const FARE_RATES = {
+      standard: { label: "Standard", base: 2.5, perMile: 1.2, perMin: 0.22, eta: 4, capacity: "Up to 4" },
+      comfort: { label: "Comfort", base: 4, perMile: 1.8, perMin: 0.3, eta: 7, capacity: "Premium car" },
+      xl: { label: "SHE-XL", base: 5.5, perMile: 2.1, perMin: 0.35, eta: 10, capacity: "Up to 6" }
+    };
+    const cities = [
+      { name: "Chicago", live: true }, { name: "New York", live: true }, { name: "Atlanta", live: true },
+      { name: "Austin", live: true }, { name: "Los Angeles", live: false }, { name: "Miami", live: false },
+      { name: "Houston", live: true }, { name: "Seattle", live: false }, { name: "Boston", live: false },
+      { name: "Philadelphia", live: false }
+    ];
+    const app = document.getElementById("app");
+    let testimonialIndex = 0;
+    let testimonialTimer = null;
+    let countdownTimer = null;
+    let incomingTimer = null;
+
+    window.SHErideApp = {
+      session: null,
+      signup: { step: 1, type: "", data: {} },
+      booking: { step: 1, pickup: "", dropoff: "", schedule: "now", rideType: "standard", promo: "", confirmed: false },
+      driverApply: { step: 1, data: {} },
+      contacts: [
+        { name: "Maya Rodriguez", phone: "+1 (312) 555-0198" },
+        { name: "Priya Sharma", phone: "+1 (512) 555-0147" }
+      ],
+      safetyOn: true,
+      login(user) {
+        this.session = { email: user.email, role: user.role, name: user.name };
+        this.updateNav();
+      },
+      logout() {
+        this.session = null;
+        this.updateNav();
+        showToast({ type: "info", message: "You have been logged out." });
+        navigateTo("#home");
+      },
+      updateNav() {
+        const auth = document.getElementById("nav-auth");
+        if (!auth) return;
+        if (this.session) {
+          const route = this.session.role === "driver" ? "driver-dashboard" : "rider-dashboard";
+          auth.innerHTML = `
+            <div class="nav-user-menu" tabindex="0">
+              <span class="avatar-circle">${escapeHtml(this.session.name[0])}</span>
+              <span>${escapeHtml(this.session.name)}</span>
+              <div class="dropdown-menu">
+                <a href="#${route}">Dashboard</a>
+                <a href="#book-ride">Book a Ride</a>
+                <button type="button" onclick="SHErideApp.logout()">Log Out</button>
+              </div>
+            </div>`;
+        } else {
+          auth.innerHTML = `
+            <a href="#login" class="btn btn-outline-white">Log In</a>
+            <a href="#signup" class="btn btn-primary">Sign Up</a>`;
+        }
+      }
+    };
+
+    const routes = {
+      home: renderHome,
+      login: renderLogin,
+      signup: renderSignup,
+      "rider-dashboard": renderRiderDashboard,
+      "driver-dashboard": renderDriverDashboard,
+      "book-ride": renderBookRide,
+      safety: renderSafetyPage,
+      about: renderAbout,
+      "driver-apply": renderDriverApply,
+      "how-it-works": renderHowItWorks
+    };
+
+    function navigateTo(hash) { window.location.hash = hash; }
+    function currentRoute() { return window.location.hash.replace("#", "") || "home"; }
+    function money(value) { return "$" + Number(value).toFixed(2); }
+    function calculateFare(type, miles = 4.2, minutes = 18) {
+      const r = FARE_RATES[type];
+      return r.base + (r.perMile * miles) + (r.perMin * minutes);
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m]));
+    }
+    function setPage(html) {
+      clearInterval(testimonialTimer);
+      clearInterval(countdownTimer);
+      clearTimeout(incomingTimer);
+      app.innerHTML = html;
+      window.scrollTo(0, 0);
+      app.focus({ preventScroll: true });
+      attachReveal();
+      animateVisibleCounters();
+      updateActiveNav();
+      closeMobileNav();
+    }
+    function render() {
+      const page = currentRoute();
+      const renderer = routes[page] || routes.home;
+      renderer();
+      SHErideApp.updateNav();
+    }
+    function updateActiveNav() {
+      const page = currentRoute();
+      document.querySelectorAll("[data-route]").forEach((link) => link.classList.toggle("active", link.dataset.route === page));
+    }
+
+    function showToast({ type = "success", message, duration = 4000, actions = "" }) {
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<div><strong>${type === "error" ? "Needs attention" : type === "info" ? "Update" : "Success"}</strong><div>${message}</div>${actions}</div><button type="button" aria-label="Dismiss">x</button>`;
+      toast.querySelector("button").addEventListener("click", () => toast.remove());
+      document.getElementById("toast-container").appendChild(toast);
+      setTimeout(() => toast.remove(), duration);
+    }
+    function openModal(title, content) {
+      document.getElementById("modal-title").textContent = title;
+      document.getElementById("modal-body").innerHTML = content;
+      document.getElementById("modal-overlay").classList.add("active");
+    }
+    function closeModal() { document.getElementById("modal-overlay").classList.remove("active"); }
+    window.closeModal = closeModal;
+
+    function footer() {
+      return `
+        <footer class="footer">
+          <div class="container footer-grid">
+            <div>
+              <a class="logo" href="#home">SHE<span>ride</span></a>
+              <p class="muted" style="margin-top:.75rem;color:#B8C0BA">Your journey, your safety, your community.</p>
+            </div>
+            <div class="footer-links">
+              <div class="footer-column"><h3>Company</h3><a href="#about">About</a><a href="#safety">Safety</a><a href="#how-it-works">How It Works</a></div>
+              <div class="footer-column"><h3>Riders</h3><a href="#book-ride">Book a Ride</a><a href="#rider-dashboard">Dashboard</a><a href="#safety">Support</a></div>
+              <div class="footer-column"><h3>Drivers</h3><a href="#driver-apply">Apply</a><a href="#driver-dashboard">Driver Dashboard</a><a href="#about">Community</a></div>
+              <div class="footer-column"><h3>Legal</h3><a href="#" data-modal="privacy">Privacy</a><a href="#" data-modal="terms">Terms</a><a href="#" data-modal="access">Accessibility</a></div>
+            </div>
+          </div>
+          <div class="container footer-bottom">&copy; 2026 SHEride Inc. Designed by Women. Built for Women.</div>
+        </footer>`;
+    }
+
+    function renderHome() {
+      setPage(`
+        <section class="hero">
+          <span class="blob blob-one"></span><span class="blob blob-two"></span>
+          <div class="container hero-grid">
+            <div class="reveal">
+              <p class="hero-kicker">Designed by women. Built for women.</p>
+              <h1>Your Ride. Your Rules. Your Safety.</h1>
+              <p class="hero-subhead">SHEride is a women-first ride-sharing platform with booking, live safety tools, verified drivers, and flexible earning built into one trusted experience.</p>
+              <div class="hero-actions">
+                <a class="btn btn-primary" href="#book-ride">Get a Ride</a>
+                <a class="btn btn-secondary" href="#driver-apply">Drive With SHEride</a>
+              </div>
+              <div class="trust-row">
+                <span class="trust-badge">Verified women drivers</span>
+                <span class="trust-badge">4.9 average rating</span>
+                <span class="trust-badge">Available in 50+ cities</span>
+              </div>
+            </div>
+            <div class="phone-mockup reveal" aria-label="SHEride app preview">
+              <div class="phone-screen">
+                <strong class="green">Book a SHEride</strong>
+                <div class="phone-route">
+                  <div class="phone-row">Pickup: Current location</div>
+                  <div class="phone-row">Drop-off: West Loop</div>
+                </div>
+                <div class="mini-map"><span class="map-dot start"></span><span class="map-dot end"></span></div>
+                <div class="phone-row" style="margin-top:1rem"><strong>Keisha M.</strong><br><span class="muted">4 min away, verified, 4.98 rating</span></div>
+                <button class="btn btn-primary" style="width:100%;margin-top:1rem" onclick="navigateTo('#book-ride')">Confirm Ride</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="stats-bar">
+          <div class="stats-grid">
+            ${statCell("50000", "Women Drivers", "+")}
+            ${statCell("2100000", "Safe Rides Completed", "+")}
+            ${statCell("50", "Cities Active", "+")}
+            ${statCell("49", "Average Rating", "/10")}
+          </div>
+        </section>
+        <section class="section" id="how-preview">
+          <div class="container">
+            <div class="section-heading reveal"><h2>How SHEride Works</h2><p>Click each step to see how the ride flow supports safety from start to finish.</p></div>
+            <div class="grid-3">
+              ${stepCard(1, "Request Your Ride", "Enter your route, compare ride types, and see fare estimates before booking.", "Schedule now or later, apply a promo, and choose comfort preferences.")}
+              ${stepCard(2, "Meet Your Driver", "Track a verified driver with photo, car details, rating, and masked contact.", "Your route can be shared automatically with trusted contacts.")}
+              ${stepCard(3, "Arrive Safely", "Confirm arrival, rate the trip, tip the driver, and re-book common routes.", "Safety status remains visible throughout the ride.")}
+            </div>
+          </div>
+        </section>
+        <section class="section" style="background:var(--bg-sage)">
+          <div class="container grid-2">
+            <div class="reveal"><h2>Book, Share, Manage.</h2><p class="muted" style="margin-top:1rem">This v2 prototype includes a real booking wizard, rider dashboard, driver mode, safety settings, trusted contacts, and account simulation.</p><div class="hero-actions"><a class="btn btn-primary" href="#login">Try Mock Login</a><a class="btn btn-ghost" href="#signup">Create Account</a></div></div>
+            <div class="panel reveal">
+              <h3>Demo Credentials</h3>
+              <p class="muted" style="margin-top:.75rem">Rider: rider@sheride.com / rider123</p>
+              <p class="muted">Driver: driver@sheride.com / driver123</p>
+            </div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="container">
+            <div class="section-heading reveal"><h2>What Women Are Saying</h2><p>Six real-feeling stories rotate like an app carousel.</p></div>
+            <div class="testimonial-shell panel reveal">
+              <div class="testimonial-track" id="testimonial-track">
+                ${testimonial("Maya R., Chicago", "I finally feel safe getting home after a night out. SHEride changed everything for me.")}
+                ${testimonial("Priya K., Austin", "Driving with SHEride has given me financial independence I never thought possible.")}
+                ${testimonial("Aaliyah J., Atlanta", "The app is intuitive, and every detail feels made for women like me.")}
+                ${testimonial("Jules T., New York", "The trusted contact sharing gave my family peace without making the ride awkward.")}
+                ${testimonial("Renee M., Houston", "I use SHEride for airport runs, late dinners, and client meetings. It feels reliable.")}
+                ${testimonial("Samira B., Seattle", "The driver flow makes earning feel organized instead of stressful.")}
+              </div>
+            </div>
+            <div class="dots" id="testimonial-dots"></div>
+            <div class="distribution panel reveal">
+              <strong>94% of riders rate SHEride 5 stars</strong>
+              <div class="bar" style="margin-top:.7rem"><span style="width:94%"></span></div>
+            </div>
+          </div>
+        </section>
+        ${citySelector()}
+        ${footer()}
+      `);
+      initStepCards();
+      initTestimonials();
+      initCitySelector();
+    }
+    function statCell(value, label, suffix) { return `<div class="stat-cell reveal"><span class="stat-number" data-count="${value}" data-suffix="${suffix}">0</span><span>${label}</span></div>`; }
+    function stepCard(n, title, body, detail) { return `<article class="card sage step-card reveal"><span class="step-number">${n}</span><h3>${title}</h3><p class="muted" style="margin-top:.7rem">${body}</p><div class="step-detail">${detail}</div></article>`; }
+    function testimonial(name, quote) { return `<article class="testimonial-card"><div class="rating">★★★★★</div><blockquote style="margin:1rem 0;font-style:italic">"${quote}"</blockquote><strong class="green">${name}</strong></article>`; }
+    function citySelector() {
+      return `<section class="section" style="background:var(--bg-sage)">
+        <div class="container">
+          <div class="section-heading reveal"><h2>Find SHEride in Your City</h2><p>Search or tap a city to see launch status.</p></div>
+          <div class="city-search reveal">
+            <input id="city-search" type="search" placeholder="Search your city">
+            <div class="city-badges" id="city-badges">${cities.map(city => `<button class="city-badge" data-city="${city.name}">${city.name}</button>`).join("")}</div>
+            <div class="panel" id="city-result" style="display:none"></div>
+          </div>
+        </div>
+      </section>`;
+    }
+
+    function renderLogin() {
+      setPage(`
+        <section class="auth-page">
+          <form class="auth-card form-grid" id="login-form" novalidate>
+            <a class="logo green" href="#home">SHE<span>ride</span></a>
+            <div><h2>Welcome Back.</h2><p class="muted" style="margin-top:.5rem">Log in to continue your journey with SHEride.</p></div>
+            <div class="form-row"><label for="login-email">Email Address</label><input id="login-email" type="email" autocomplete="email"><p class="inline-error" id="login-email-error"></p></div>
+            <div class="form-row"><label for="login-password">Password</label><div class="password-wrap"><input id="login-password" type="password" autocomplete="current-password"><button class="show-pass" type="button" data-toggle-pass="login-password">Show</button></div><p class="inline-error" id="login-password-error"></p></div>
+            <div class="toggle-row"><label class="checkbox-row"><input type="checkbox"> Remember Me</label><a class="red" href="#" id="forgot-link">Forgot Password?</a></div>
+            <button class="btn btn-primary" type="submit" id="login-submit">Log In</button>
+            <div class="divider">or</div>
+            <button class="btn oauth" type="button" onclick="showToast({type:'info',message:'Google sign-in is a UI demo in this prototype.'})">Continue with Google</button>
+            <button class="btn oauth" type="button" onclick="showToast({type:'info',message:'Apple sign-in is a UI demo in this prototype.'})">Continue with Apple</button>
+            <p class="muted" style="text-align:center">Do not have an account? <a class="red" href="#signup">Sign Up</a></p>
+          </form>
+        </section>`);
+      document.querySelectorAll("[data-toggle-pass]").forEach(bindPasswordToggle);
+      document.getElementById("forgot-link").addEventListener("click", (event) => {
+        event.preventDefault();
+        openModal("Reset Password", `<div class="form-grid"><p class="muted">Enter your email and we will simulate sending a reset link.</p><input id="reset-email" type="email" placeholder="you@example.com"><button class="btn btn-primary" onclick="sendReset()">Send Reset Link</button></div>`);
+      });
+      document.getElementById("login-form").addEventListener("submit", handleLogin);
+    }
+    function bindPasswordToggle(button) {
+      button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.togglePass);
+        input.type = input.type === "password" ? "text" : "password";
+        button.textContent = input.type === "password" ? "Show" : "Hide";
+      });
+    }
+    function sendReset() {
+      const email = document.getElementById("reset-email").value.trim();
+      if (!email.includes("@") || !email.includes(".")) { showToast({ type: "error", message: "Enter a valid email first." }); return; }
+      openModal("Check Your Inbox", `<p>A reset link has been sent to <strong>${escapeHtml(email)}</strong>.</p><button class="btn btn-primary" style="margin-top:1rem" onclick="closeModal()">Done</button>`);
+    }
+    window.sendReset = sendReset;
+    function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      let ok = true;
+      document.getElementById("login-email-error").textContent = "";
+      document.getElementById("login-password-error").textContent = "";
+      if (!email.includes("@") || !email.includes(".")) { document.getElementById("login-email-error").textContent = "Enter a valid email address."; ok = false; }
+      if (password.length < 8) { document.getElementById("login-password-error").textContent = "Password must be at least 8 characters."; ok = false; }
+      if (!ok) return;
+      const submit = document.getElementById("login-submit");
+      submit.disabled = true;
+      submit.textContent = "Logging In...";
+      setTimeout(() => {
+        const user = MOCK_USERS.find((u) => u.email === email && u.password === password);
+        if (!user) {
+          submit.disabled = false;
+          submit.textContent = "Log In";
+          showToast({ type: "error", message: "Incorrect email or password. Please try again." });
+          return;
+        }
+        SHErideApp.login(user);
+        showToast({ message: `Welcome back, ${user.name}.` });
+        navigateTo(user.role === "driver" ? "#driver-dashboard" : "#rider-dashboard");
+      }, 1500);
+    }
+
+    function renderSignup() {
+      const s = SHErideApp.signup;
+      setPage(`
+        <section class="auth-page">
+          <div class="auth-card">
+            <a class="logo green" href="#home">SHE<span>ride</span></a>
+            <div style="margin:1rem 0"><h2>Join the Movement.</h2><p class="muted" style="margin-top:.5rem">Create your account in under 2 minutes.</p></div>
+            <div class="progress"><span style="width:${(s.step / 3) * 100}%"></span></div>
+            <p class="muted" style="margin:.65rem 0 1.25rem">Step ${s.step} of 3</p>
+            <div id="signup-step">${signupStepHtml()}</div>
+          </div>
+        </section>`);
+      bindSignupStep();
+    }
+    function signupStepHtml() {
+      const s = SHErideApp.signup;
+      if (s.step === 1) return `
+        <div class="form-grid">
+          <h3>Are you joining as a rider or driver?</h3>
+          <div class="choice-grid">
+            <button class="choice-card ${s.type === "rider" ? "selected" : ""}" data-signup-type="rider"><span class="check-badge">✓</span><h3>I want to ride</h3><p class="muted">Book verified rides and manage safety tools.</p></button>
+            <button class="choice-card ${s.type === "driver" ? "selected" : ""}" data-signup-type="driver"><span class="check-badge">✓</span><h3>I want to drive</h3><p class="muted">Earn on your schedule with women-first support.</p></button>
+          </div>
+          <button class="btn btn-primary" id="signup-next" ${s.type ? "" : "disabled"}>Continue</button>
+        </div>`;
+      if (s.step === 2) return `
+        <form class="form-grid" id="signup-info" novalidate>
+          <div class="grid-2"><div class="form-row"><label>First Name</label><input id="su-first" value="${s.data.first || ""}"><p class="inline-error"></p></div><div class="form-row"><label>Last Name</label><input id="su-last" value="${s.data.last || ""}"><p class="inline-error"></p></div></div>
+          <div class="form-row"><label>Email Address</label><input id="su-email" type="email" value="${s.data.email || ""}"><p class="inline-error"></p></div>
+          <div class="grid-2"><div class="form-row"><label>Phone Number</label><input id="su-phone" type="tel" placeholder="+1 555 0123" value="${s.data.phone || ""}"><p class="inline-error"></p></div><div class="form-row"><label>Date of Birth</label><input id="su-dob" type="date" value="${s.data.dob || ""}"><p class="inline-error"></p></div></div>
+          <div class="form-row"><label>Password</label><input id="su-password" type="password"><div class="strength-bar" id="strength"><span></span><span></span><span></span><span></span></div><p class="inline-error"></p></div>
+          <div class="form-row"><label>Confirm Password</label><input id="su-confirm" type="password"><p class="inline-error"></p></div>
+          <div class="grid-2"><button class="btn btn-ghost" type="button" data-signup-back>Back</button><button class="btn btn-primary" type="submit">Continue</button></div>
+        </form>`;
+      return `
+        <form class="form-grid" id="signup-terms">
+          <label class="checkbox-row"><input type="checkbox" required> I agree to the Terms of Service and Privacy Policy</label>
+          <label class="checkbox-row"><input type="checkbox" required> I am 18 years of age or older</label>
+          <label class="checkbox-row"><input type="checkbox" required> I identify as a woman or non-binary person</label>
+          <label class="checkbox-row"><input type="checkbox"> Receive safety alerts and community updates</label>
+          <div class="grid-2"><button class="btn btn-ghost" type="button" data-signup-back>Back</button><button class="btn btn-primary" type="submit">Create My Account</button></div>
+        </form>`;
+    }
+    function bindSignupStep() {
+      document.querySelectorAll("[data-signup-type]").forEach((button) => button.addEventListener("click", () => {
+        SHErideApp.signup.type = button.dataset.signupType;
+        renderSignup();
+      }));
+      document.querySelector("[data-signup-back]")?.addEventListener("click", () => { SHErideApp.signup.step -= 1; renderSignup(); });
+      document.getElementById("signup-next")?.addEventListener("click", () => { SHErideApp.signup.step = 2; renderSignup(); });
+      const password = document.getElementById("su-password");
+      password?.addEventListener("input", () => updateStrength(password.value));
+      document.getElementById("signup-info")?.addEventListener("submit", handleSignupInfo);
+      document.getElementById("signup-terms")?.addEventListener("submit", handleSignupTerms);
+    }
+    function updateStrength(value) {
+      const score = [value.length >= 8, /[A-Z]/.test(value), /[0-9]/.test(value), /[^A-Za-z0-9]/.test(value)].filter(Boolean).length;
+      const cls = ["", "weak", "fair", "good", "strong"][score];
+      document.getElementById("strength").className = `strength-bar ${cls}`;
+    }
+    function is18(dob) {
+      const birth = new Date(dob);
+      const cutoff = new Date();
+      cutoff.setFullYear(cutoff.getFullYear() - 18);
+      return birth <= cutoff;
+    }
+    function handleSignupInfo(event) {
+      event.preventDefault();
+      const data = {
+        first: document.getElementById("su-first").value.trim(),
+        last: document.getElementById("su-last").value.trim(),
+        email: document.getElementById("su-email").value.trim(),
+        phone: document.getElementById("su-phone").value.trim(),
+        dob: document.getElementById("su-dob").value,
+        password: document.getElementById("su-password").value,
+        confirm: document.getElementById("su-confirm").value
+      };
+      if (!data.first || !data.last || !data.email.includes("@") || !data.phone || !is18(data.dob) || data.password.length < 8 || data.password !== data.confirm) {
+        showToast({ type: "error", message: "Please complete every field, confirm age 18+, and match passwords." });
+        return;
+      }
+      SHErideApp.signup.data = data;
+      SHErideApp.signup.step = 3;
+      renderSignup();
+    }
+    function handleSignupTerms(event) {
+      event.preventDefault();
+      if (![...event.target.querySelectorAll("input[required]")].every((i) => i.checked)) {
+        showToast({ type: "error", message: "Required confirmations must be checked." });
+        return;
+      }
+      const name = SHErideApp.signup.data.first || "Sarah";
+      const role = SHErideApp.signup.type === "driver" ? "driver" : "rider";
+      SHErideApp.login({ email: SHErideApp.signup.data.email || "new@sheride.com", role, name });
+      setPage(`<section class="auth-page"><div class="auth-card" style="text-align:center"><h2>Welcome to SHEride, ${escapeHtml(name)}.</h2><p class="muted" style="margin:1rem 0">Your account has been created.</p><a class="btn btn-primary" href="#${role}-dashboard">Go to Dashboard</a></div></section>`);
+      showToast({ message: "Account created." });
+    }
+
+    function dashboardTop(title, sub, badge = "") {
+      const session = SHErideApp.session || { name: "Sarah", role: "rider" };
+      return `<div class="dash-top"><div><h2>${title}</h2><p class="muted" style="margin-top:.5rem">${sub}</p></div><div style="display:flex;align-items:center;gap:.7rem">${badge}<span class="avatar-circle">${session.name[0]}</span><strong>${session.name}</strong></div></div>`;
+    }
+    function renderRiderDashboard() {
+      if (!SHErideApp.session || SHErideApp.session.role !== "rider") SHErideApp.login({ email: "rider@sheride.com", role: "rider", name: "Sarah" });
+      const fare = calculateFare("standard", 3.8, 14);
+      setPage(`
+        <section class="section"><div class="container">
+          ${dashboardTop("Ready for your next ride?", "Your verified driver is waiting.")}
+          <div class="grid-2 dash-grid">
+            <div class="form-grid">
+              <div class="panel">
+                <h3>Quick Book</h3>
+                <div class="form-grid" style="margin-top:1rem">
+                  <div class="form-row"><label>Current Location</label><div class="grid-2"><input id="quick-pickup" value="Current location"><button class="btn btn-ghost" onclick="detectLocation()">Auto-detect</button></div></div>
+                  <div class="form-row"><label>Where to?</label><input id="quick-dropoff" placeholder="Search destination"></div>
+                  <div><label>Ride Type</label><div class="segmented" id="quick-types">${Object.keys(FARE_RATES).map((t, i) => `<button class="segment ${i===0 ? "active" : ""}" data-quick-type="${t}">${FARE_RATES[t].label}</button>`).join("")}</div></div>
+                  <p><strong>Est. Fare:</strong> <span id="quick-fare">${money(fare)}</span> <span class="muted"> · ETA: </span><span id="quick-eta">4 min</span></p>
+                  <button class="btn btn-primary" onclick="quickBook()">Get a SHEride</button>
+                </div>
+              </div>
+              <div class="map-placeholder"><div><div class="pulse-pin"></div><p>Live map simulation active. GPS tracking is represented for prototype use.</p></div></div>
+            </div>
+            <aside class="form-grid">
+              <div class="panel"><h3>Recent Rides</h3>${recentRide("May 18", "Keisha M.", "River North to West Loop", "$12.80")}${recentRide("May 14", "Nadia A.", "Home to ORD", "$32.40")}${recentRide("May 08", "Elena T.", "Downtown to Hyde Park", "$18.20")}</div>
+              <div class="panel"><div class="toggle-row"><div><h3>Safety Mode: <span id="safety-label">${SHErideApp.safetyOn ? "ON" : "OFF"}</span></h3><p class="muted">Live sharing with Maya, Priya, and one more.</p></div><button class="switch ${SHErideApp.safetyOn ? "on" : ""}" id="safety-toggle" aria-label="Toggle safety mode"></button></div><button class="btn btn-ghost" style="margin-top:1rem" onclick="navigateTo('#safety')">Manage Safety Settings</button></div>
+              <div class="panel promo"><h3>Your first 3 rides are free</h3><p class="muted">Use code: <strong>SHERIDE3</strong></p></div>
+            </aside>
+          </div>
+        </div></section>${footer()}`);
+      bindRiderDashboard();
+    }
+    function recentRide(date, driver, route, fare) { return `<div class="ride-row"><strong>${date} · ${driver}</strong><span class="muted">${route}</span><div class="toggle-row"><span>${fare} · ★★★★★</span><button class="btn btn-small btn-ghost" onclick="rebook('${route}')">Re-book</button></div></div>`; }
+    function bindRiderDashboard() {
+      document.querySelectorAll("[data-quick-type]").forEach((button) => button.addEventListener("click", () => {
+        document.querySelectorAll("[data-quick-type]").forEach((b) => b.classList.remove("active"));
+        button.classList.add("active");
+        const type = button.dataset.quickType;
+        document.getElementById("quick-fare").textContent = money(calculateFare(type, 3.8, 14));
+        document.getElementById("quick-eta").textContent = `${FARE_RATES[type].eta} min`;
+      }));
+      document.getElementById("safety-toggle").addEventListener("click", () => {
+        SHErideApp.safetyOn = !SHErideApp.safetyOn;
+        document.getElementById("safety-toggle").classList.toggle("on", SHErideApp.safetyOn);
+        document.getElementById("safety-label").textContent = SHErideApp.safetyOn ? "ON" : "OFF";
+        showToast({ type: "info", message: `Safety mode ${SHErideApp.safetyOn ? "enabled" : "paused"}.` });
+      });
+    }
+    function detectLocation() { document.getElementById("quick-pickup").value = "Detected: 214 W Lake St"; showToast({ message: "Location detected for this prototype." }); }
+    function rebook(route) { SHErideApp.booking.pickup = route.split(" to ")[0]; SHErideApp.booking.dropoff = route.split(" to ")[1] || ""; navigateTo("#book-ride"); }
+    function quickBook() { SHErideApp.booking.pickup = document.getElementById("quick-pickup").value; SHErideApp.booking.dropoff = document.getElementById("quick-dropoff").value; SHErideApp.booking.step = 2; navigateTo("#book-ride"); }
+    window.detectLocation = detectLocation; window.rebook = rebook; window.quickBook = quickBook;
+
+    function renderDriverDashboard() {
+      if (!SHErideApp.session || SHErideApp.session.role !== "driver") SHErideApp.login({ email: "driver@sheride.com", role: "driver", name: "Nadia" });
+      setPage(`
+        <section class="section"><div class="container">
+          ${dashboardTop("Your shift. Your terms.", "Go online when you are ready. Earn on your schedule.", '<span class="trust-badge" style="background:var(--green-primary);color:white">Driver Mode</span>')}
+          <div class="panel online-hero" id="online-hero"><h2 id="online-status">You are offline</h2><p class="muted" id="online-sub" style="margin:1rem 0">Start accepting rides when you are ready.</p><button class="btn btn-primary" id="online-toggle">Go Online</button></div>
+          <div class="grid-4" style="margin-top:1rem">
+            <div class="card metric-card primary"><h3>Today's Earnings</h3><strong style="font-size:2rem">$84.20</strong></div>
+            <div class="card metric-card sage"><h3>Trips Completed</h3><strong style="font-size:2rem">6</strong></div>
+            <div class="card metric-card sage"><h3>Online Hours</h3><strong style="font-size:2rem">4h 32m</strong></div>
+            <div class="card metric-card sage"><h3>Avg. Rating</h3><strong style="font-size:2rem">4.97</strong></div>
+          </div>
+          <div class="panel chart-wrap" style="margin-top:1rem"><h3>Last 7 Days</h3><canvas id="earnings-chart" width="760" height="260" aria-label="Driver earnings chart"></canvas></div>
+        </div></section>${footer()}`);
+      document.getElementById("online-toggle").addEventListener("click", toggleOnline);
+      drawEarningsChart();
+    }
+    function toggleOnline() {
+      const hero = document.getElementById("online-hero");
+      const online = !hero.classList.contains("online");
+      hero.classList.toggle("online", online);
+      document.getElementById("online-status").textContent = online ? "You are online, accepting rides" : "You are offline";
+      document.getElementById("online-sub").textContent = online ? "Incoming requests will appear as notifications." : "Start accepting rides when you are ready.";
+      document.getElementById("online-toggle").textContent = online ? "Go Offline" : "Go Online";
+      if (online) {
+        showToast({ message: "Driver mode is online." });
+        incomingTimer = setTimeout(() => {
+          showToast({ type: "info", message: "New ride request: Maya R. · 0.3 miles away · $12.50 est.", duration: 9000, actions: '<div style="margin-top:.7rem"><button class="btn btn-small btn-primary" onclick="showToast({message:\'Ride accepted.\'});this.closest(\'.toast\').remove()">Accept</button> <button class="btn btn-small btn-ghost" onclick="this.closest(\'.toast\').remove()">Decline</button></div>' });
+        }, 3000);
+      }
+    }
+    function drawEarningsChart() {
+      const canvas = document.getElementById("earnings-chart");
+      const ctx = canvas.getContext("2d");
+      const data = [{ label: "Mon", value: 62 }, { label: "Tue", value: 88 }, { label: "Wed", value: 54 }, { label: "Thu", value: 97 }, { label: "Fri", value: 120 }, { label: "Sat", value: 145 }, { label: "Sun", value: 84 }];
+      const max = Math.max(...data.map((d) => d.value));
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      data.forEach((d, i) => {
+        const barWidth = canvas.width / data.length - 18;
+        const h = (d.value / max) * (canvas.height - 60);
+        const x = i * (barWidth + 18) + 12;
+        const y = canvas.height - h - 34;
+        ctx.fillStyle = "#1DB954";
+        ctx.beginPath();
+        ctx.roundRect(x, y, barWidth, h, 7);
+        ctx.fill();
+        ctx.fillStyle = "#145A32";
+        ctx.font = "700 13px Poppins";
+        ctx.fillText("$" + d.value, x + 6, y - 8);
+        ctx.fillStyle = "#1A1A1A";
+        ctx.fillText(d.label, x + barWidth / 2 - 12, canvas.height - 10);
+      });
+    }
+
+    function renderBookRide() {
+      const b = SHErideApp.booking;
+      setPage(`<section class="section"><div class="container booking-shell"><div class="section-heading"><h2>Where are we headed?</h2><p>Enter your destination and we will handle the rest.</p></div><div class="panel"><div class="progress"><span style="width:${(b.step / 4) * 100}%"></span></div><p class="muted" style="margin:.7rem 0 1.3rem">Step ${b.step} of 4</p>${bookingStepHtml()}</div></div></section>${footer()}`);
+      bindBooking();
+    }
+    function bookingStepHtml() {
+      const b = SHErideApp.booking;
+      if (b.step === 1) return `
+        <div class="form-grid">
+          <div class="form-row"><label>Pickup</label><input id="book-pickup" value="${escapeHtml(b.pickup)}" placeholder="Start typing an address"><div class="suggestions" id="pickup-suggestions"></div></div>
+          <div class="form-row"><label>Drop-off</label><input id="book-dropoff" value="${escapeHtml(b.dropoff)}" placeholder="Where to?"><div class="suggestions" id="dropoff-suggestions"></div></div>
+          <div><label>Ride for</label><div class="segmented"><button class="segment ${b.schedule === "now" ? "active" : ""}" data-schedule="now">Now</button><button class="segment ${b.schedule !== "now" ? "active" : ""}" data-schedule="later">Schedule</button></div><input id="schedule-time" type="datetime-local" style="margin-top:.7rem;display:${b.schedule === "now" ? "none" : "block"}"></div>
+          <button class="btn btn-primary" id="booking-next">Choose Ride Type</button>
+        </div>`;
+      if (b.step === 2) return `<div class="grid-3">${Object.keys(FARE_RATES).map((type) => rideTypeCard(type)).join("")}</div><div class="grid-2" style="margin-top:1rem"><button class="btn btn-ghost" data-book-back>Back</button><button class="btn btn-primary" id="booking-next">Confirm Details</button></div>`;
+      if (b.step === 3) {
+        const fare = calculateFare(b.rideType, 8.2, 28);
+        return `<div class="summary-list">
+          <div><strong>Route</strong><span>${escapeHtml(b.pickup || "123 Main St")} → ${escapeHtml(b.dropoff || "O'Hare Airport")}</span></div>
+          <div><strong>Driver</strong><span>Keisha M. · 4.98 · verified</span></div>
+          <div><strong>Est. Fare</strong><span id="confirm-fare">${money(fare)}</span></div>
+          <div><strong>Est. Time</strong><span>28 min</span></div>
+          <div><strong>Payment</strong><span>Visa ending 4242 <button class="btn btn-small btn-ghost" onclick="openPaymentModal()">Change</button></span></div>
+          <div><strong>Promo Code</strong><span><input id="promo-code" style="min-height:38px;width:160px" placeholder="Code"> <button class="btn btn-small btn-ghost" onclick="applyPromo()">Apply</button></span></div>
+        </div><div class="grid-2" style="margin-top:1rem"><button class="btn btn-ghost" data-book-back>Back</button><button class="btn btn-primary" id="confirm-ride">Confirm Ride</button></div>`;
+      }
+      return `<div style="text-align:center"><h2>Your SHEride is on the way.</h2><p class="muted" style="margin:1rem 0">Keisha M. is <span class="countdown" id="eta-countdown">4:00</span> away</p><p>Toyota Camry · White · IL 4SHE829</p><div class="hero-actions" style="justify-content:center"><button class="btn btn-ghost" onclick="openContactDriver()">Contact Driver</button><button class="btn btn-primary" onclick="openSos()">SOS</button><a class="btn btn-ghost" href="#home">Back to Home</a></div></div>`;
+    }
+    function rideTypeCard(type) {
+      const r = FARE_RATES[type];
+      return `<button class="card ride-type-card ${SHErideApp.booking.rideType === type ? "selected" : ""}" data-ride-type="${type}"><h3>${r.label}</h3><p class="muted" style="margin:.7rem 0">${r.eta} min away</p><strong>${money(calculateFare(type, 4.2, 18))}</strong><p class="muted">${r.capacity}</p></button>`;
+    }
+    function bindBooking() {
+      document.querySelectorAll("[data-schedule]").forEach((button) => button.addEventListener("click", () => { SHErideApp.booking.schedule = button.dataset.schedule === "later" ? "later" : "now"; renderBookRide(); }));
+      ["pickup", "dropoff"].forEach((kind) => {
+        const input = document.getElementById(`book-${kind}`);
+        input?.addEventListener("input", () => showSuggestions(kind, input.value));
+      });
+      document.querySelectorAll("[data-ride-type]").forEach((button) => button.addEventListener("click", () => { SHErideApp.booking.rideType = button.dataset.rideType; renderBookRide(); }));
+      document.querySelector("[data-book-back]")?.addEventListener("click", () => { SHErideApp.booking.step -= 1; renderBookRide(); });
+      document.getElementById("booking-next")?.addEventListener("click", () => {
+        if (SHErideApp.booking.step === 1) {
+          SHErideApp.booking.pickup = document.getElementById("book-pickup").value.trim();
+          SHErideApp.booking.dropoff = document.getElementById("book-dropoff").value.trim();
+          if (!SHErideApp.booking.pickup || !SHErideApp.booking.dropoff) { showToast({ type: "error", message: "Pickup and drop-off are required." }); return; }
+        }
+        SHErideApp.booking.step += 1;
+        renderBookRide();
+      });
+      document.getElementById("confirm-ride")?.addEventListener("click", () => { SHErideApp.booking.step = 4; renderBookRide(); startCountdown(240); showToast({ message: "Ride confirmed. Safety sharing is on." }); });
+      if (SHErideApp.booking.step === 4) startCountdown(240);
+    }
+    function showSuggestions(kind, value) {
+      const box = document.getElementById(`${kind}-suggestions`);
+      if (!value || value.length < 2) { box.innerHTML = ""; return; }
+      const suggestions = [`${value} Ave`, `${value} Station`, `${value} Center`].slice(0, 3);
+      box.innerHTML = suggestions.map((s) => `<button class="suggestion" type="button" data-suggest="${kind}">${escapeHtml(s)}</button>`).join("");
+      box.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => { document.getElementById(`book-${kind}`).value = button.textContent; box.innerHTML = ""; }));
+    }
+    function applyPromo() {
+      const code = document.getElementById("promo-code").value.trim().toUpperCase();
+      if (code === "SHERIDE3") { document.getElementById("confirm-fare").textContent = "$0.00"; showToast({ message: "Promo applied. This ride is free." }); }
+      else showToast({ type: "error", message: "Promo code not recognized." });
+    }
+    function openPaymentModal() { openModal("Payment Method", `<p class="muted">Payment management is simulated here.</p><div class="form-grid" style="margin-top:1rem"><button class="btn btn-ghost">Visa ending 4242</button><button class="btn btn-ghost">Add New Card</button><button class="btn btn-primary" onclick="closeModal()">Save</button></div>`); }
+    function openContactDriver() { openModal("Masked Contact", `<p>Your number stays private. Calling Keisha M. through a masked SHEride line.</p><button class="btn btn-primary" style="margin-top:1rem" onclick="closeModal()">Start Call</button>`); }
+    function openSos() { openModal("SOS Confirmation", `<p>This would share your live GPS coordinates with emergency services and trusted contacts.</p><div class="grid-2" style="margin-top:1rem"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="showToast({type:'error',message:'SOS alert simulated.'});closeModal()">Send SOS</button></div>`); }
+    function startCountdown(seconds) {
+      clearInterval(countdownTimer);
+      const el = document.getElementById("eta-countdown");
+      if (!el) return;
+      let remaining = seconds;
+      countdownTimer = setInterval(() => {
+        remaining = Math.max(0, remaining - 1);
+        const m = Math.floor(remaining / 60);
+        const s = String(remaining % 60).padStart(2, "0");
+        el.textContent = `${m}:${s}`;
+      }, 1000);
+    }
+    window.applyPromo = applyPromo; window.openPaymentModal = openPaymentModal; window.openContactDriver = openContactDriver; window.openSos = openSos;
+
+    function renderSafetyPage() {
+      setPage(`
+        <section class="sub-hero"><div class="container"><h1>Safety Is Everything We Do.</h1><p style="margin-top:1rem">Built from lived experience. Designed with zero compromises.</p></div></section>
+        <section class="section"><div class="container grid-2">
+          <div class="panel reveal"><h2>Every Feature Has a Purpose.</h2><p class="muted" style="margin-top:1rem">Nothing on SHEride exists by accident. Each tool supports identity, privacy, support, and accountability before, during, and after every ride.</p><div class="timeline">${["Book with verified driver matching","Share trip with trusted contacts","Track route and masked contact","Confirm arrival and rate experience"].map((t) => `<div class="timeline-step"><h3>${t}</h3><p class="muted">Designed to keep you informed and in control.</p></div>`).join("")}</div></div>
+          <div class="panel reveal"><h3>Trusted Contact Manager</h3><div id="contacts-list" style="margin-top:1rem"></div><button class="btn btn-primary" style="margin-top:1rem" onclick="addContact()">Add Another Contact</button></div>
+        </div></section>
+        <section class="section" style="background:var(--bg-sage)"><div class="container"><div class="section-heading"><h2>Safety FAQ</h2></div><div class="panel">${faqItems().map((f) => `<div class="faq-item"><button class="faq-question">${f.q}<span>+</span></button><div class="faq-answer">${f.a}</div></div>`).join("")}</div></div></section>
+        ${footer()}`);
+      renderContacts();
+      bindFaq();
+    }
+    function faqItems() {
+      return [
+        { q: "How are drivers verified?", a: "Drivers complete identity review, background screening, vehicle checks, and ongoing account monitoring." },
+        { q: "What happens if I feel unsafe during a ride?", a: "You can contact support, share your trip, use masked calling, or trigger SOS from the ride screen." },
+        { q: "How does Live Trip Sharing work?", a: "Trusted contacts receive a simulated live route, ETA, driver details, and arrival status." },
+        { q: "Can I choose a specific driver?", a: "You can re-book previous drivers in this prototype. Production matching would depend on availability." },
+        { q: "Is my personal information kept private?", a: "The design masks phone numbers and keeps direct contact details private." },
+        { q: "What is the SOS button?", a: "SOS is a high-priority emergency action that would share live GPS coordinates." }
+      ];
+    }
+    function bindFaq() {
+      document.querySelectorAll(".faq-item").forEach((item) => item.querySelector(".faq-question").addEventListener("click", () => {
+        const open = item.classList.contains("open");
+        document.querySelectorAll(".faq-item").forEach((i) => i.classList.remove("open"));
+        if (!open) item.classList.add("open");
+      }));
+    }
+    function renderContacts() {
+      const list = document.getElementById("contacts-list");
+      if (!list) return;
+      list.innerHTML = SHErideApp.contacts.map((c, i) => `<div class="contact-row"><div><strong>${escapeHtml(c.name)}</strong><p class="muted">${escapeHtml(c.phone)}</p></div><button class="btn btn-small btn-ghost" onclick="removeContact(${i})">Remove</button></div>`).join("");
+    }
+    function addContact() {
+      if (SHErideApp.contacts.length >= 5) { showToast({ type: "error", message: "You can add up to 5 trusted contacts." }); return; }
+      const name = `Trusted Contact ${SHErideApp.contacts.length + 1}`;
+      SHErideApp.contacts.push({ name, phone: "+1 (555) 010-0000" });
+      renderContacts();
+      showToast({ message: `${name} added.` });
+    }
+    function removeContact(index) { SHErideApp.contacts.splice(index, 1); renderContacts(); showToast({ type: "info", message: "Trusted contact removed." }); }
+    window.addContact = addContact; window.removeContact = removeContact;
+
+    function renderAbout() {
+      setPage(`
+        <section class="sub-hero"><div class="container"><h1>We Built the Ride We Needed.</h1><p style="margin-top:1rem">SHEride was founded by women who were tired of feeling unsafe, undervalued, and unheard.</p></div></section>
+        <section class="section"><div class="container grid-2"><div class="panel reveal"><h2>We built the ride we wished existed.</h2><p class="muted" style="margin-top:1rem">Our mission is to make mobility feel safer, more human, and more economically useful for women who ride and women who drive.</p></div><div class="panel sage reveal"><h3>Founding Story</h3><p class="muted" style="margin-top:.7rem">SHEride began as a late-night group chat about getting home safely. It grew into a platform centered on safety, dignity, flexible earnings, and community accountability.</p></div></div></section>
+        <section class="section" style="background:var(--bg-sage)"><div class="container"><div class="section-heading"><h2>Our Team</h2></div><div class="grid-4">${team("Amara", "Founder", "Product leader focused on safer cities.")}${team("Leena", "Safety Lead", "Builds trusted systems and support flows.")}${team("Noor", "Driver Ops", "Designs better earning experiences.")}${team("Camila", "Design", "Makes complex tools feel calm.")}</div></div></section>
+        <section class="section"><div class="container"><div class="grid-4">${statPanel("50000", "Women Drivers", "+")}${statPanel("2100000", "Safe Rides Completed", "+")}${statPanel("50", "Cities Active", "+")}${statPanel("49", "Average Rating", "/10")}</div><div class="press-row" style="margin-top:2rem"><span class="press-pill">Forbes</span><span class="press-pill">TechCrunch</span><span class="press-pill">Fast Company</span><span class="press-pill">Wired</span></div></div></section>${footer()}`);
+    }
+    function team(name, title, bio) { return `<article class="card"><div class="team-avatar">${name[0]}</div><h3>${name}</h3><strong class="green">${title}</strong><p class="muted" style="margin-top:.7rem">${bio}</p></article>`; }
+    function statPanel(value, label, suffix) { return `<div class="card sage reveal"><span class="stat-number" data-count="${value}" data-suffix="${suffix}">0</span><strong>${label}</strong></div>`; }
+
+    function renderDriverApply() {
+      const step = SHErideApp.driverApply.step;
+      setPage(`<section class="section"><div class="container booking-shell"><div class="section-heading"><h2>Drive With SHEride</h2><p>Complete the application in five focused steps.</p></div><div class="panel"><div class="progress"><span style="width:${(step / 5) * 100}%"></span></div><p class="muted" style="margin:.7rem 0 1.3rem">Step ${step} of 5</p>${driverApplyStep()}</div></div></section>${footer()}`);
+      bindDriverApply();
+    }
+    function driverApplyStep() {
+      const step = SHErideApp.driverApply.step;
+      if (step === 1) return applyForm("Personal Info", ["Full name", "Email", "Phone", "Date of birth", "City", "State"]);
+      if (step === 2) return `<div class="form-grid"><h3>Identity Verification</h3><div class="form-row"><label>Gender identity</label><select><option>Woman</option><option>Non-binary</option><option>Prefer to self-describe</option></select></div><div class="form-row"><label>Government ID upload</label><input class="file-input" type="file"></div>${applyNav()}</div>`;
+      if (step === 3) return applyForm("Vehicle Details", ["Make", "Model", "Year", "Color", "License Plate", "Insurance upload"], true);
+      if (step === 4) return `<div class="form-grid"><h3>Background Check Consent</h3><label class="checkbox-row"><input id="bg-consent" type="checkbox"> I consent to identity, vehicle, and background verification.</label>${applyNav()}</div>`;
+      return `<div style="text-align:center"><h2>Application Received.</h2><p class="muted" style="margin:1rem 0">Reference number: SHE-${Math.floor(100000 + Math.random() * 900000)}</p><a class="btn btn-primary" href="#driver-dashboard">Go to Driver Dashboard</a></div>`;
+    }
+    function applyForm(title, fields, vehicle = false) { return `<form class="form-grid driver-apply-form"><h3>${title}</h3><div class="grid-2">${fields.map((f) => `<div class="form-row"><label>${f}</label><input ${vehicle && f.includes("upload") ? 'class="file-input" type="file"' : f.includes("Date") ? 'type="date"' : ""}></div>`).join("")}</div>${applyNav()}</form>`; }
+    function applyNav() { return `<div class="grid-2"><button class="btn btn-ghost" type="button" data-apply-back>Back</button><button class="btn btn-primary" type="button" data-apply-next>Continue</button></div>`; }
+    function bindDriverApply() {
+      document.querySelector("[data-apply-back]")?.addEventListener("click", () => { SHErideApp.driverApply.step = Math.max(1, SHErideApp.driverApply.step - 1); renderDriverApply(); });
+      document.querySelector("[data-apply-next]")?.addEventListener("click", () => {
+        if (SHErideApp.driverApply.step === 4 && !document.getElementById("bg-consent").checked) { showToast({ type: "error", message: "Consent is required before continuing." }); return; }
+        SHErideApp.driverApply.step = Math.min(5, SHErideApp.driverApply.step + 1);
+        renderDriverApply();
+      });
+    }
+
+    function renderHowItWorks() {
+      setPage(`<section class="sub-hero"><div class="container"><h1>How SHEride Works</h1><p style="margin-top:1rem">A more detailed look at booking, safety, driving, and support.</p></div></section>
+      <section class="section"><div class="container"><div class="grid-3">${stepCard(1, "Plan", "Search, schedule, and compare ride types.", "Built-in fare calculator and promo support.")}${stepCard(2, "Match", "Get paired with a verified driver.", "Profile, vehicle, ETA, and masked contact are available.")}${stepCard(3, "Travel", "Share the trip and manage safety.", "SOS, trusted contacts, and live trip status stay nearby.")}${stepCard(4, "Arrive", "Confirm your destination.", "Arrival prompts and feedback close the loop.")}${stepCard(5, "Re-book", "Repeat common routes.", "Recent rides on the dashboard speed up regular travel.")}${stepCard(6, "Drive", "Drivers can go online and track earnings.", "The driver dashboard includes requests, ratings, and charts.")}</div></div></section>${footer()}`);
+      initStepCards();
+    }
+
+    function initStepCards() { document.querySelectorAll(".step-card").forEach((card) => card.addEventListener("click", () => card.classList.toggle("open"))); }
+    function initTestimonials() {
+      const track = document.getElementById("testimonial-track");
+      const dots = document.getElementById("testimonial-dots");
+      if (!track || !dots) return;
+      const count = track.children.length;
+      dots.innerHTML = Array.from({ length: count }, (_, i) => `<button class="dot ${i === testimonialIndex ? "active" : ""}" data-dot="${i}" aria-label="Show testimonial ${i + 1}"></button>`).join("");
+      const show = (i) => {
+        testimonialIndex = i % count;
+        track.style.transform = `translateX(-${testimonialIndex * 100}%)`;
+        dots.querySelectorAll(".dot").forEach((d, idx) => d.classList.toggle("active", idx === testimonialIndex));
+      };
+      dots.querySelectorAll("[data-dot]").forEach((button) => button.addEventListener("click", () => show(Number(button.dataset.dot))));
+      testimonialTimer = setInterval(() => show((testimonialIndex + 1) % count), 4500);
+    }
+    function initCitySelector() {
+      const result = document.getElementById("city-result");
+      const search = document.getElementById("city-search");
+      const badges = document.getElementById("city-badges");
+      if (!result || !search || !badges) return;
+      const showCity = (name) => {
+        const city = cities.find((c) => c.name === name);
+        result.style.display = "block";
+        result.innerHTML = city.live ? `<h3>SHEride is live in ${city.name}.</h3><p class="muted">Book now or invite a trusted contact before your next trip.</p>` : `<h3>SHEride is coming soon to ${city.name}.</h3><p class="muted">Join the waitlist and we will notify you at launch.</p><button class="btn btn-primary" style="margin-top:1rem" onclick="showToast({message:'Waitlist joined.'})">Join Waitlist</button>`;
+      };
+      badges.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => showCity(b.dataset.city)));
+      search.addEventListener("input", () => {
+        const term = search.value.toLowerCase();
+        badges.querySelectorAll("button").forEach((b) => b.style.display = b.dataset.city.toLowerCase().includes(term) ? "" : "none");
+      });
+    }
+    function attachReveal() {
+      const reveals = document.querySelectorAll(".reveal");
+      if (!("IntersectionObserver" in window)) { reveals.forEach((r) => r.classList.add("visible")); return; }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      reveals.forEach((el) => observer.observe(el));
+    }
+    function animateVisibleCounters() {
+      document.querySelectorAll("[data-count]").forEach((el) => {
+        const target = Number(el.dataset.count);
+        const suffix = el.dataset.suffix || "";
+        let current = 0;
+        const step = Math.max(1, Math.ceil(target / 80));
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          if (suffix === "/10") el.textContent = (current / 10).toFixed(1);
+          else el.textContent = current.toLocaleString() + suffix;
+        }, 18);
+      });
+    }
+    function closeMobileNav() {
+      document.getElementById("nav-menu").classList.remove("active");
+      document.querySelector(".hamburger").classList.remove("open");
+      document.querySelector(".hamburger").setAttribute("aria-expanded", "false");
+      document.body.classList.remove("nav-open");
+    }
+    document.querySelector(".hamburger").addEventListener("click", () => {
+      const menu = document.getElementById("nav-menu");
+      const button = document.querySelector(".hamburger");
+      const open = menu.classList.toggle("active");
+      button.classList.toggle("open", open);
+      button.setAttribute("aria-expanded", String(open));
+      document.body.classList.toggle("nav-open", open);
+    });
+    document.addEventListener("click", (event) => {
+      const modalLink = event.target.closest("[data-modal]");
+      if (modalLink) {
+        event.preventDefault();
+        openModal(modalLink.dataset.modal === "terms" ? "Terms" : modalLink.dataset.modal === "privacy" ? "Privacy" : "Accessibility", "<p>This is placeholder legal content for the prototype. Production terms would be reviewed by counsel.</p>");
+      }
+    });
+    window.addEventListener("scroll", () => {
+      document.querySelector(".navbar").style.boxShadow = window.scrollY > 50 ? "0 4px 20px rgba(26,26,26,0.2)" : "none";
+    });
+    window.addEventListener("hashchange", render);
+    SHErideApp.updateNav();
+    if (!window.location.hash) window.location.hash = "#home";
+    else render();
+  </script>
+</body>
+</html>
